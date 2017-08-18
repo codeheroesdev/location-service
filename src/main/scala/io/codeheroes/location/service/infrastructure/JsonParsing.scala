@@ -15,7 +15,7 @@ trait JsonParsing extends StrictLogging {
 
   def toJson[T: Manifest](response: HttpResponse)(implicit mat: ActorMaterializer, ec: ExecutionContext): Future[T] =
     response.entity.toStrict(5 seconds)
-      .map(_.getData().decodeString("UTF-8"))
+      .map(_.getData().utf8String)
       .map(body => try {
         read[T](body)
       } catch {

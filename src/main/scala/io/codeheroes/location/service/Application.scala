@@ -18,17 +18,22 @@ class Application(config: Config) extends StrictLogging {
   private implicit val scheduler = system.scheduler
   private implicit val materializer = ActorMaterializer()
 
-  private val locationService = new GoogleLocationService(config.getString("application.google.api.key"))
+  private val locationService = new GoogleLocationService(
+    config.getString("application.google.api.url"),
+    config.getString("application.google.api.key")
+  )
 
   private val locationEndpoint = new LocationEndpoint(locationService)
 
   private val endpointSettings = new EndpointSettings(locationEndpoint.routes)
 
+  val publicRoutes = endpointSettings.routing
+
   def start = {
     val bindHost = config.getString("application.bind-host")
     val bindPort = config.getInt("application.bind-port")
 
-    Http().bindAndHandle(endpointSettings.routing, bindHost, bindPort).onComplete {
+    Http().bindAndHandle(publicRoutes, bindHost, bindPort).onComplete {
       case Success(_) => logger.info(s"Client API started at $bindHost:$bindPort")
       case Failure(ex) => logger.error(s"Cannot bind API to $bindHost:$bindPort", ex)
     }

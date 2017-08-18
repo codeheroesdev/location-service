@@ -31,9 +31,16 @@ object Dependencies {
     "org.json4s" %% "json4s-core" % json4sVersion
   )
 
+  val testDependencies = Seq(
+    "org.scalactic" %% "scalactic" % scalaTestVersion % "test",
+    "org.scalatest" %% "scalatest" % scalaTestVersion % "test",
+    "com.typesafe.akka" %% "akka-http-testkit" % akkaHttpVersion % "test"
+  )
+
   val projectDependencies = Seq(
     loggingDependencies,
     akkaDependencies,
+    testDependencies,
     akkaHttpDependencies
   ).reduce(_ ++ _)
 

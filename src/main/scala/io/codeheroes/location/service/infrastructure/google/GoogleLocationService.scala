@@ -14,7 +14,7 @@ import io.codeheroes.location.service.infrastructure.google.GoogleResponses.Goog
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-class GoogleLocationService(apiKey: String)(implicit mat: ActorMaterializer, system: ActorSystem, ec: ExecutionContext, scheduler: Scheduler) extends LocationService with StrictLogging with JsonParsing {
+class GoogleLocationService(apiUrl: String, apiKey: String)(implicit mat: ActorMaterializer, system: ActorSystem, ec: ExecutionContext, scheduler: Scheduler) extends LocationService with StrictLogging with JsonParsing {
 
   private val client = Http()
   private val breaker =
@@ -28,7 +28,7 @@ class GoogleLocationService(apiKey: String)(implicit mat: ActorMaterializer, sys
       .onClose(logger.info("CircuitBreaker for RESTLocationService closed."))
 
   def _getLocation(address: String): Future[Option[Location]] = {
-    val request = HttpRequest(uri = s"https://maps.googleapis.com/maps/api/geocode/json?address=${address.replaceAll(" ", "+").replacePolishCharacters}&apikey=$apiKey")
+    val request = HttpRequest(uri = s"$apiUrl/maps/api/geocode/json?address=${address.replaceAll(" ", "+").replacePolishCharacters}&apikey=$apiKey")
 
     client
       .singleRequest(request)
