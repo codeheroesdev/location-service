@@ -28,7 +28,8 @@ class GoogleLocationService(apiUrl: String, apiKey: String)(implicit mat: ActorM
       .onClose(logger.info("CircuitBreaker for RESTLocationService closed."))
 
   def _getLocation(address: String): Future[Option[Location]] = {
-    val request = HttpRequest(uri = s"$apiUrl/maps/api/geocode/json?address=${address.replaceAll(" ", "+").replacePolishCharacters}&apikey=$apiKey")
+    println(address.replacePolishCharactersAndToLow)
+    val request = HttpRequest(uri = s"$apiUrl/maps/api/geocode/json?address=${address.replaceAll(" ", "+").replacePolishCharactersAndToLow}&apikey=$apiKey")
 
     client
       .singleRequest(request)
@@ -40,16 +41,19 @@ class GoogleLocationService(apiUrl: String, apiKey: String)(implicit mat: ActorM
   }
 
   implicit class PolishString(value: String) {
-    def replacePolishCharacters = value
-      .replace('ą', 'a').replace('Ą', 'A')
-      .replace('ć', 'c').replace('Ć', 'C')
-      .replace('ę', 'e').replace('Ę', 'E')
-      .replace('ł', 'l').replace('Ł', 'L')
-      .replace('ń', 'n').replace('Ń', 'N')
-      .replace('ó', 'o').replace('Ó', 'O')
-      .replace('ś', 's').replace('Ś', 'S')
-      .replace('ż', 'z').replace('Ż', 'Z')
-      .replace('ź', 'z').replace('Ź', 'Z')
+    private val replacements = Map(
+      'ą' -> 'a',
+      'ć' -> 'c',
+      'ę' -> 'e',
+      'ł' -> 'l',
+      'ń' -> 'n',
+      'ó' -> 'o',
+      'ś' -> 's',
+      'ż' -> 'z',
+      'ź' -> 'z'
+    )
+
+    def replacePolishCharactersAndToLow = value.toLowerCase().map(c => replacements.getOrElse(c, c))
   }
 
   override def getLocation(address: String): Future[Option[Location]] = breaker.withCircuitBreaker(_getLocation(address))

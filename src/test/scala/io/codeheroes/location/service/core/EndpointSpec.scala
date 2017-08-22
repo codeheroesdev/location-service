@@ -38,6 +38,6 @@ trait EndpointSpec extends FlatSpec with Matchers with ScalatestRouteTest with J
   def responseAsList(implicit timeout: FiniteDuration = 3 second) = responseAs[List[String]]
 
   def responseAsJson(implicit timeout: FiniteDuration = 3 second) =
-    Await.result(responseEntity.toStrict(timeout).map(_.data.utf8String).map(data => parse(data)), timeout)
+    Await.result(responseEntity.toStrict(timeout).map(_.data.utf8String).map(parse(_)), timeout)
 
 }
