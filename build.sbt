@@ -1,5 +1,5 @@
 name := "location-service"
-version := "0.0"
+version := "0.2"
 organizationName := "io.codeheroes"
 
 scalaVersion := "2.12.3"
