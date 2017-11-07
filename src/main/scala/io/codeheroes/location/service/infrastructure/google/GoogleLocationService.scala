@@ -2,9 +2,9 @@ package io.codeheroes.location.service.infrastructure.google
 
 import akka.actor.{ActorSystem, Scheduler}
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.{HttpRequest, Uri}
 import akka.http.scaladsl.model.StatusCodes.OK
 import akka.http.scaladsl.model.Uri.Query
+import akka.http.scaladsl.model.{HttpRequest, Uri}
 import akka.pattern.CircuitBreaker
 import akka.stream.ActorMaterializer
 import com.typesafe.scalalogging.StrictLogging
