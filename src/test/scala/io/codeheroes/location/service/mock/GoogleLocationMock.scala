@@ -20,6 +20,7 @@ class GoogleLocationMock(host: String, port: Int)(implicit mat: ActorMaterialize
   private val routes =
     (path("maps" / "api" / "geocode" / "json") & get & parameters('address.as[String], 'apikey.as[String])) {
       case ("Kazimierza Wielkiego", "123") => complete(response())
+      case ("Kraków, Stańczyka!, /\\23413śćźńłó-'\\! ,./", "123") => complete(response())
       case _ => complete(response(true))
     }
 
