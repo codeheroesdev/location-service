@@ -36,7 +36,9 @@ class GoogleLocationService(apiUrl: String, apiKey: String)(
       .onClose(logger.info("CircuitBreaker for RESTLocationService closed."))
 
   def _getLocation(address: String): Future[Option[Location]] = {
-    val request = HttpRequest(uri = Uri(s"$apiUrl/maps/api/geocode/json").withQuery(Query(Map("address" -> address, "apikey" -> apiKey))))
+    val request = HttpRequest(
+      uri = Uri(s"$apiUrl/maps/api/geocode/json").withQuery(Query(Map("address" -> address, "apikey" -> apiKey)))
+    )
 
     client
       .singleRequest(request)
