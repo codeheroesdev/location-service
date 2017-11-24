@@ -37,7 +37,7 @@ class GoogleLocationService(apiUrl: String, apiKey: String)(
 
   def _getLocation(address: String): Future[Option[Location]] = {
     val request = HttpRequest(
-      uri = Uri(s"$apiUrl/maps/api/geocode/json").withQuery(Query(Map("address" -> address, "apikey" -> apiKey)))
+      uri = Uri(s"$apiUrl/maps/api/geocode/json").withQuery(Query(Map("address" -> address, "key" -> apiKey)))
     )
 
     client
