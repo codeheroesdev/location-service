@@ -10,7 +10,7 @@ enablePlugins(DockerPlugin)
 
 dockerBaseImage := "java:openjdk-8"
 daemonUser := "root"
-dockerRepository := Some("docker.codeheroes.io")
+dockerRepository := Some("codeheroes/location-service")
 
 lazy val `location-service` = project.in(file("."))
   .settings(resolvers ++= Dependencies.additionalResolvers)
