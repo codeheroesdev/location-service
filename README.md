@@ -1,5 +1,5 @@
 # location-service
-Simple stateless service exposing REST API for Google Geolication API integration.
+Simple stateless service exposing REST API for Google Geolocation API integration.
 
 You can use our Docker image:
 ```
