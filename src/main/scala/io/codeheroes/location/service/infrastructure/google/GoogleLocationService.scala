@@ -7,35 +7,62 @@ import akka.http.scaladsl.model.StatusCodes.OK
 import akka.pattern.CircuitBreaker
 import akka.stream.ActorMaterializer
 import com.typesafe.scalalogging.StrictLogging
-import io.codeheroes.location.service.domain.{Location, LocationService}
+import io.codeheroes.location.service.domain._
 import io.codeheroes.location.service.infrastructure.JsonParsing
 import io.codeheroes.location.service.infrastructure.google.GoogleResponses.GoogleLocationResponse
 
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Future}
 
-class GoogleLocationService(apiUrl: String, apiKey: String)(implicit mat: ActorMaterializer, system: ActorSystem, ec: ExecutionContext, scheduler: Scheduler) extends LocationService with StrictLogging with JsonParsing {
+class GoogleLocationService(apiUrl: String, apiKey: String)(
+    implicit mat: ActorMaterializer,
+    system: ActorSystem,
+    ec: ExecutionContext,
+    scheduler: Scheduler)
+    extends LocationService
+    with StrictLogging
+    with JsonParsing {
 
   private val client = Http()
   private val breaker =
-    new CircuitBreaker(
-      scheduler,
-      maxFailures = 3,
-      callTimeout = 15 seconds,
-      resetTimeout = 15 seconds)
+    new CircuitBreaker(scheduler,
+                       maxFailures = 3,
+                       callTimeout = 15 seconds,
+                       resetTimeout = 15 seconds)
       .onOpen(logger.error("CircuitBreaker for RESTLocationService opened."))
-      .onHalfOpen(logger.warn("CircuitBreaker for RESTLocationService half opened."))
+      .onHalfOpen(
+        logger.warn("CircuitBreaker for RESTLocationService half opened."))
       .onClose(logger.info("CircuitBreaker for RESTLocationService closed."))
 
   def _getLocation(address: String): Future[Option[Location]] = {
-    val request = HttpRequest(uri = s"$apiUrl/maps/api/geocode/json?address=${address.replaceAll(" ", "+").replacePolishCharactersAndToLow}&apikey=$apiKey")
+    val request = HttpRequest(uri =
+      s"$apiUrl/maps/api/geocode/json?address=${address.replaceAll(" ", "+").replacePolishCharactersAndToLow}&apikey=$apiKey")
 
     client
       .singleRequest(request)
       .map(response => (response.status, response))
       .flatMap {
-        case (OK, response) => toJson[GoogleLocationResponse](response).map(response => response.results.headOption.map(_.geometry.location).map(result => Location(result.lng, result.lat)))
-        case (_, response) => throw new IllegalStateException(s"Unhandled response: [$response] for request: [$request]")
+        case (OK, response) =>
+          toJson[GoogleLocationResponse](response).map(response =>
+            response.results.headOption.map { response =>
+              Location(
+                response.geometry.location.lng,
+                response.geometry.location.lat,
+                response.address_components
+                  .map(_.map(address =>
+                    AddressComponent(address.short_name, address.long_name)))
+                  .toList
+                  .flatten
+              )
+
+          })
+        case (_, response) =>
+          response
+            .discardEntityBytes()
+            .future()
+            .map(_ =>
+              throw new IllegalStateException(
+                s"Unhandled response: [$response] for request: [$request]"))
       }
   }
 
@@ -52,8 +79,10 @@ class GoogleLocationService(apiUrl: String, apiKey: String)(implicit mat: ActorM
       'ź' -> 'z'
     )
 
-    def replacePolishCharactersAndToLow = value.toLowerCase().map(c => replacements.getOrElse(c, c))
+    def replacePolishCharactersAndToLow =
+      value.toLowerCase().map(c => replacements.getOrElse(c, c))
   }
 
-  override def getLocation(address: String): Future[Option[Location]] = breaker.withCircuitBreaker(_getLocation(address))
+  override def getLocation(address: String): Future[Option[Location]] =
+    breaker.withCircuitBreaker(_getLocation(address))
 }

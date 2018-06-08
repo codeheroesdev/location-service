@@ -8,4 +8,6 @@ trait LocationService {
 
 }
 
-final case class Location(longitude: Double, latitude: Double)
+final case class Location(longitude: Double, latitude: Double, addressComponents: List[AddressComponent])
+
+final case class AddressComponent(shortName: String, longName: String)

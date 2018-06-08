@@ -27,6 +27,12 @@ class GoogleLocationMock(host: String, port: Int)(implicit mat: ActorMaterialize
     if (empty) Map("results" -> List.empty)
     else Map(
     "results" -> List(Map(
+      "address_components" -> List(
+        Map(
+          "short_name" -> "ala",
+          "long_name" -> "ma kota"
+        )
+      ),
       "geometry" -> Map(
         "location" -> Map(
           "lat" -> 50.124242,

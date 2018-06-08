@@ -11,6 +11,9 @@ class LocationEndpointTest extends EndpointSpec {
       val json = responseAsJson
       (json \ "latitude").extract[Double] shouldBe 50.124242
       (json \ "longitude").extract[Double] shouldBe 19.812421
+
+      (json \ "addressComponents" \ "shortName").extract[List[String]] should contain only "ala"
+      (json \ "addressComponents" \ "longName").extract[List[String]] should contain only "ma kota"
     }
 
   it should "return 404 for non known address" in
